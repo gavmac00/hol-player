@@ -19,7 +19,7 @@ def client():
             choice = vote[6]
 
         new = random.randint(1,100) 
-        print("A: choice: " + choice + ", new: " + str(new) + ", old: " + str(old))
+        #print("A: choice: " + choice + ", new: " + str(new) + ", old: " + str(old))
         status = clientStatusResponse(choice,new,old) #status decided here
 
         clientOutput(status,choice,new,old,loss) # "X was higher/lower than Y..."
@@ -49,7 +49,7 @@ def player():
 
     while not alltext[0] == "-": #status = 1
         alltext = playerRead()
-        print("1: " + alltext)
+        #print("1: " + alltext)
         if alltext[0] == "v":
             alltext = playerRead()
             print("2: " + alltext)

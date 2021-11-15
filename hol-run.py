@@ -7,136 +7,153 @@ def client():
     status = 1
     score = 1
     old = random.randint(1,100)
-    give = "new: " + str(old) + "\nend"
+    give = "new: " + str(old) + " end"
+    vote = "nresetforsafety"
 
-    #instructions
-    print("\n\nA game of Higher or Lower. Each round, press 'h' for \"Higher\", press 'l' for \"Lower\".")
-    print("The starting number is " + str(old))
-
-    with open('hol-data.txt', 'w') as wd:
-        wd.write(give)
-        wd.close()
-
-    print("Higher or Lower?")
-    time. sleep(8)
+    clientBegin(give,score,old)
+    time.sleep(10)
 
     while status == 1:
-        #read phase
-        with open('hol-data.txt', 'r') as rd:
-            vote = rd.read()
-            rd.close()
-
-        while vote[0] == "v":
-            time.sleep(1)
+        if vote[0] == "n":
+            vote = clientRead()
             choice = vote[6]
-            print("Client interpreted: " + choice + ".")
 
-            #descision phase
-            new = random.randint(1,100) 
+        new = random.randint(1,100) 
+        print("A: choice: " + choice + ", new: " + str(new) + ", old: " + str(old))
+        status = clientStatusResponse(choice,new,old) #status decided here
 
-            if choice == "h":
-                if new > old:
-                    print(str(new) + " is higher than " + str(old) + ".")
-                    score = score + 1
-                    old = new
-                else: 
-                    status = 0
-                    print(str(new) + " is not higher than " + str(old) + ".")
-                    with open('hol-data.txt', 'w') as ld:
-                        ld.write(loss)
-                        ld.close()
-                        time.sleep(2)
-            if choice == "l":
-                if new < old:
-                    print(str(new) + " is lower than " + str(old) + ".")
-                    score = score + 1
-                    old = new
-                else:
-                    status = 0
-                    print(str(new) + " is not lower than " + str(old) + ".")
-                    with open('hol-data.txt', 'w') as ld:
-                        ld.write(loss)
-                        ld.close()
-                        time.sleep(2)
-
-            print("Round: " + str(score))
-
-            #new round phase
-            if status == 1:
-                give = "new: " + str(old) + "\nend"
-                with open('hol-data.txt', 'w') as wd:
-                    wd.write(give)
-                    wd.close()
-                    print("Now, Higher or Lower? ")
-                time.sleep(8)
-            else:
-                break
-
-        vote = give
-        time.sleep(1)
-                    
+        clientOutput(status,choice,new,old,loss) # "X was higher/lower than Y..."
+        vote = "nresetforsafety"
+        #next round
+        if status == 1:
+            score = score + 1
+            old = new
+            print("\nRound: " + str(score))
+            give = "new: " + str(old) + " end"
+            with open('hol-data.txt', 'w') as wd:
+                wd.write(give)
+                print("Now, Higher or Lower? ")
+            time.sleep(10)
+        else:
+            clientWriteLoss(loss)
+    
     #loss
-    print("Game over, Score: " + str(score))
-    time.sleep(4)
+    print("\nGame over, Score: " + str(score))
+    time.sleep(5)
     quit()
 
 def player():
-    new = "vote: h\nend"
-    alltext = "vote: h\nend"
-    time.sleep(2) #starts at 4 seconds
+    time.sleep(5)
+    new = "vote: h\ end"
+    alltext = "vote: h\ end"
 
-    while not alltext[0] == "-":
-
-        with open('hol-data.txt') as rd:
-            alltext = rd.read()
-
-        while alltext[5].isdigit():
-            time.sleep(1)
-            new_u = alltext[5] #units
-            new = new_u
-
-            new_t = alltext[6] #tens
-            new_h = alltext[7] #hundreds
-
-            if new_t.isdigit():
-                new = new_u + new_t
-
-            if new_h.isdigit():
-                new = new_u + new_t + new_h
-                        
-            new = int(new)
-            print("     Player interpreted: " + str(new) +".")
-
-            #voting phase
-            h = "h"
-            l = "l"
-
-            if new < 50:
-                vote = h
-
-            elif new > 50:
-                vote = l
-
-            else:
-                pr = random.randint(1,2)
-                if pr == 1:
-                    vote = h
-                else:
-                    vote = l
-
-            send = "vote: " + vote + "\nend"
-
+    while not alltext[0] == "-": #status = 1
+        alltext = playerRead()
+        print("1: " + alltext)
+        if alltext[0] == "v":
+            alltext = playerRead()
+            print("2: " + alltext)
+            time.sleep(0.5)
+        if alltext[5].isdigit():
+            new = playerAppend(alltext)
+            send = playerVote(new)
             with open('hol-data.txt', 'w') as wd:
                 wd.write(send)
-                wd.close()
-                print("     Player cast vote of: " + vote)
-
-            time.sleep(8)
-            alltext = send
-            time.sleep(1)
-            
-    print("     Player undestood a loss.")
+            time.sleep(10)
+            alltext = "resetforsafety"
+        else:
+            break
+    #status = 0
     quit()
+
+
+def clientBegin(give,score,old):
+    print("\n\nA Game of Higher or Lower.")
+    print("Each round, press 'h' for \"Higher\", press 'l' for \"Lower\".")
+
+    with open('hol-data.txt', 'w') as wd:
+        wd.write(give)
+
+    print("\nRound: " + str(score) + ", The starting number is " + str(old))
+    print("Higher or Lower?")
+
+def clientStatusResponse(choice,new,old):
+    if choice == "h":
+        if new > old:
+            status = 1
+        else: 
+            status = 0
+    if choice == "l":
+        if new < old:
+            status = 1
+        else:
+            status = 0
+    return status
+
+def clientWriteLoss(loss):
+    with open('hol-data.txt', 'w') as ld:
+        ld.write(loss)
+    
+def clientRead():
+    with open('hol-data.txt', 'r') as rd:
+        vote = rd.read() 
+    return vote 
+
+def clientOutput(status,choice,new,old,loss):
+    if choice == "h":
+        if status == 1:
+            print(str(new) + " is higher than " + str(old) + ".")
+        else: 
+            print(str(new) + " is not higher than " + str(old) + ".")
+            clientWriteLoss(loss)
+    if choice == "l":
+        if status == 1:
+            print(str(new) + " is lower than " + str(old) + ".")
+        else:
+            print(str(new) + " is not lower than " + str(old) + ".")
+            clientWriteLoss(loss)
+
+def playerAppend(alltext):
+    new_u = alltext[5] #units
+    new = new_u
+
+    new_t = alltext[6] #tens
+    new_h = alltext[7] #hundreds
+
+    if new_t.isdigit():
+        new = new_u + new_t
+
+    if new_h.isdigit():
+        new = new_u + new_t + new_h
+                
+    new = int(new)
+    return new
+
+def playerVote(new):
+    h = "h"
+    l = "l"
+
+    if new < 50:
+        vote = h
+
+    elif new > 50:
+        vote = l
+
+    else:
+        pr = random.randint(1,2)
+        if pr == 1:
+            vote = h
+        else:
+            vote = l
+
+    send = "vote: " + vote + " end"
+    print("     Player Votes: " + vote)
+    return send
+
+def playerRead():
+    with open('hol-data.txt') as rd:
+        alltext = rd.read()
+    return alltext
 
 Thread(target = client).start()
 Thread(target = player).start() 

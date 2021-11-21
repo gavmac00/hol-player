@@ -1,6 +1,6 @@
+from threading import Thread
 import random as random
 import time
-from threading import Thread
 
 def client():
     loss = "--------------"
@@ -67,7 +67,6 @@ def player():
     #status = 0
     quit()
 
-
 def clientBegin(give,score,old):
     print("\n\nA Game of Higher or Lower.")
     print("Each round, press 'h' for \"Higher\", press 'l' for \"Lower\".")
@@ -131,8 +130,7 @@ def playerAppend(alltext):
     return new
 
 def contemplate():
-    rando = random.randint(1,10)
-    print(rando)
+    rando = random.randint(1,20)
     if rando == 1:
         thought = 1
     else:

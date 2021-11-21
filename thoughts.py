@@ -5,7 +5,6 @@ import random as random
 
 def contemplate():
     rando = random.randint(1,10)
-    print(rando)
     if rando == 1:
         thought = 1
     else:
